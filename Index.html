@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weather App</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div>
+      <div class="logo">Weather<span>App</span></div>
+      <div class="tagline">Real-time Weather Intelligence</div>
+    </div>
+    <div class="unit-toggle">
+      <button class="unit-btn active" id="btn-c" onclick="switchUnit('metric')">°C</button>
+      <button class="unit-btn" id="btn-f" onclick="switchUnit('imperial')">°F</button>
+    </div>
+  </header>
+
+  <div class="search-wrap">
+    <div class="search-box">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="city-input" placeholder="Search city or location…" autocomplete="off">
+      <button class="clear-input hidden" id="clear-btn" type="button" title="Clear search">×</button>
+    </div>
+    <button class="btn btn-loc" id="loc-btn" title="Use my location" onclick="getLocation()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8" stroke-dasharray="2 4"/></svg>
+    </button>
+    <button class="btn" id="search-btn" onclick="searchWeather()">Search</button>
+  </div>
+
+  <div class="error-msg" id="error-msg"></div>
+  <div class="loader" id="loader">
+    <div class="loader-ring"></div>
+    <p>Fetching atmosphere…</p>
+  </div>
+
+  <!-- Empty state -->
+  <div class="empty-state" id="empty-state">
+    <span class="empty-icon">🌤️</span>
+    <h2>What's the weather like?</h2>
+    <p>Enter a city name above or use your location to see the current conditions.</p>
+  </div>
+
+  <!-- Weather result -->
+  <div id="weather-result">
+
+    <div class="hero-card">
+      <div>
+        <div class="city-name" id="city-name">—</div>
+        <div class="country-date" id="country-date">—</div>
+        <div class="temp-display" id="temperature">—<sup>°</sup></div>
+        <div class="feels-like" id="feels-like">Feels like —</div>
+        <div class="condition-text" id="condition">—</div>
+      </div>
+      <div class="weather-icon-wrap">
+        <span class="weather-icon" id="weather-icon">🌤️</span>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7z"/></svg>
+          Humidity
+        </div>
+        <div class="stat-value" id="humidity">—<span class="stat-unit"> %</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg>
+          Wind Speed
+        </div>
+        <div class="stat-value" id="wind">—<span class="stat-unit" id="wind-unit"> m/s</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
+          UV Index
+        </div>
+        <div class="stat-value" id="uv">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>
+          Cloud Cover
+        </div>
+        <div class="stat-value" id="clouds">—<span class="stat-unit"> %</span></div>
+      </div>
+    </div>
+
+    <div class="temp-range-card">
+      <div class="range-header">
+        <div class="range-title">Daily Temperature Range</div>
+        <div class="range-values">
+          <span class="range-min" id="temp-min">—</span>
+          <span class="range-max" id="temp-max">—</span>
+        </div>
+      </div>
+      <div class="range-track">
+        <div class="range-fill" id="range-fill"></div>
+      </div>
+    </div>
+
+    <div class="forecast-card">
+      <div class="forecast-header">
+        <div class="forecast-title">5-Day Forecast</div>
+        <div class="forecast-units" id="forecast-units">°C</div>
+      </div>
+      <div class="forecast-grid" id="forecast-grid">
+        <!-- Forecast cards inserted here -->
+      </div>
+    </div>
+
+    <div class="bottom-row">
+      <div class="info-card">
+        <div class="info-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7eb8e8" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <div class="info-text">
+          <div class="label">Visibility</div>
+          <div class="value" id="visibility">—</div>
+        </div>
+      </div>
+      <div class="info-card">
+        <div class="info-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7eb8e8" stroke-width="2"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="8" stroke-dasharray="3 3"/></svg>
+        </div>
+        <div class="info-text">
+          <div class="label">Pressure</div>
+          <div class="value" id="pressure">—</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /weather-result -->
+
+</div><!-- /app -->
+
+<script src="Script.js"></script>
+</body>
+</html>
